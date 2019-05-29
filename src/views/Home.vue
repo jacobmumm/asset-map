@@ -30,13 +30,21 @@
             <gmap-polygon v-if="polygon" :paths="[polygon]" :options="{ fillColor }" :editable="true" @paths_changed="updateEdited($event)"/>
 
             <GmapMarker
+              v-if="place"
+              :position="place.geometry.location"
+              :clickable="false"
+              :draggable="false"
+              @click="center=m.position"
+            />
+
+            <!-- <GmapMarker
               :key="index"
               v-for="(m, index) in markers"
               :position="m.position"
               :clickable="true"
               :draggable="true"
               @click="center=m.position"
-            />
+            /> -->
           </GmapMap>
         </div>
       </b-col>
@@ -79,6 +87,12 @@
             :value="address"
             @place_changed="setPlace" 
           />
+          <div class='text-center pt-3' v-if="locating">
+            <fa-icon icon='spinner' size='3x' spin />
+          </div>
+          <div v-if="located">
+            Your watershed is: {{ locatedWatershed ? locatedWatershed.name : 'Unknown' }} 
+          </div>
 
           <!-- add marker at address -->
           <!-- XXX TODO 'looks like thats located in the X watershed' -->
@@ -104,6 +118,7 @@ export default {
     if(localStorage.getItem('watersheds')) {
       this.watersheds = JSON.parse(localStorage.getItem('watersheds'))
     }
+    console.log("WS=", this.watersheds)
   },
   data: function() {
     return {
@@ -116,7 +131,10 @@ export default {
       polygon: null,
       fillColor: defaultFillColor,
       address: '',
-      place: null
+      place: null,
+      locating: false,
+      located: false,
+      locatedWatershed: null
     }
   },
   computed: {
@@ -181,12 +199,43 @@ export default {
 
       console.log(place)
 
-      this.place = place
+      this.locateWatershed(place)
 
       // this.latLng = {
       //   lat: place.geometry.location.lat(),
       //   lng: place.geometry.location.lng(),
       // };
+    },
+    locateWatershed (place) {
+      this.place = place
+
+      this.address = place.formatted_address
+
+      let lat = this.place.geometry.location.lat()
+      let lng = this.place.geometry.location.lng()
+      let latLng = new google.maps.LatLng(lat, lng)
+      console.log("LL=", latLng)
+
+      this.located = false
+      this.locating = true
+
+      this.locatedWatershed = null
+
+      let this1 = this
+
+      this.watersheds.forEach(function(w) {
+        let wPolygon = new google.maps.Polygon({
+          paths: w.points // Need to call map?
+        });
+
+        console.log('CHECKING', wPolygon)
+        if(google.maps.geometry.poly.containsLocation(latLng, wPolygon)) {
+          this1.locatedWatershed = w
+        }
+      })
+
+      this.locating = false
+      this.located = true
     }
   }
 }

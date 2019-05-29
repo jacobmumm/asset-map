@@ -52,7 +52,7 @@ Vue.use(VueGoogleMaps, {
 
 Vue.config.productionTip = false
 
-new Vue({
+window.vueapp = new Vue({
   router,
   store,
   render: h => h(App)
