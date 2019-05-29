@@ -74,7 +74,7 @@
             </tr>
             <tr v-if="creating_watershed">
               <td colspan=3>
-                  <p v-if="!polygon">Click near the watershed to start drawing boundaries</p>
+                  <p v-if="!polygon">Click on the map to start drawing boundaries</p>
                   <p v-else>Drag the points around to define the watershed</p>
               </td>
             </tr>
