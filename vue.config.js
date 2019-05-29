@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  publicPath: process.env.LOGNAME == 'tomas' ? "/" : "asset-map/dist",
+  publicPath: "asset-map/",
   pluginOptions: {
     'style-resources-loader': {
       preProcessor: 'scss',
