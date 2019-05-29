@@ -5,11 +5,7 @@
     <b-row>
       <b-col>
         <div class='px-4'>
-          <div v-if="creating_watershed">
-            <h3>Defining Watershed {{ watershed_name }}</h3>
-            <p v-if="!polygon">Click near the watershed to start drawing boundaries</p>
-            <p v-else>Drag the points around to define the watershed</p>
-          </div>
+
           <GmapMap
            :options="{
               zoomControl: true,
@@ -74,6 +70,12 @@
                   <b-button :variant="watershed_name ? 'info' : null" :disabled="!watershed_name" @click="creating_watershed = true; polygon = null">Create</b-button>
                 </div>
 
+              </td>
+            </tr>
+            <tr v-if="creating_watershed">
+              <td colspan=3>
+                  <p v-if="!polygon">Click near the watershed to start drawing boundaries</p>
+                  <p v-else>Drag the points around to define the watershed</p>
               </td>
             </tr>
           </tfoot>
