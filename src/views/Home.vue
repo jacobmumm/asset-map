@@ -117,9 +117,29 @@ export default {
     // HelloWorld
   },
   mounted () {
-    if(localStorage.getItem('watersheds')) {
+    /*if(localStorage.getItem('watersheds')) {
       this.watersheds = JSON.parse(localStorage.getItem('watersheds'))
-    }
+    }*/
+    let self = this;
+    fetch("/api/watersheds").then(function(res) { return res.json(); })
+      .then(function(watersheds) {
+      self.watersheds = watersheds.map(function(w) {
+        var points = w.bounds.split(":").map(function(b) {
+            var coord = b.split(",");
+            console.log(b, coord);
+            return {
+              lat: parseFloat(coord[0]),
+              lng: parseFloat(coord[1])
+            };
+        });
+        return {
+          name: w.title,
+          fillColor: w.color,
+          points: points
+        };
+      });
+      console.log(self.watersheds);
+    });
     console.log("WS=", this.watersheds)
   },
   data: function() {
@@ -165,15 +185,50 @@ export default {
       }
     },
     saveWatershed: function() {
-      this.watersheds.push({
+      var self = this;
+      var newWatershed = {
+        name: this.watershed_name,
+        points: this.polygon,
+        fillColor: this.fillColor
+      };
+      
+      var first = true;
+      var bounds = this.polygon.reduce(function(str, coord) {
+        if (first) {
+          first = false;
+        } else {
+          str += ":";
+        }
+        str += coord.lat + "," + coord.lng;
+        return str;
+      }, "");
+      
+      fetch("/api/watersheds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newWatershed.name,
+          bounds: bounds,
+          color: newWatershed.fillColor
+        })
+      }).then(function(res) { return res.json(); })
+	.then(function(ws) {
+        if (ws.id) {
+          newWatershed.id = ws.id;
+          self.watersheds.push(newWatershed);
+        }
+        console.log(this.watersheds)
+      });
+      /*this.watersheds.push({
         name: this.watershed_name,
         points: this.polygon,
         fillColor: this.fillColor
       })
       console.log(this.watersheds)
+      
       let parsed = JSON.stringify(this.watersheds);
       localStorage.setItem('watersheds', parsed);
-
+      */
       this.cancelWatershed()
     },
     cancelWatershed: function() {
