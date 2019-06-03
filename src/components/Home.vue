@@ -3,7 +3,8 @@
     <b-row>
       <b-col>
         <div class='px-4'>
-          <select class="form-control" placeholder="Select a map">
+          <select class="form-control" v-model="selectedMapId" v-on:change="handleChange">
+            <option>Select a map</option>
             <option v-for="map in maps" :key="map.id" :value="map.id">
               {{map.title}}
             </option>
@@ -14,8 +15,8 @@
         <input id="newMapTitle" :value="newMapTitle" />
       </b-col>
     </b-row>
-    <b-row class="mt-2" v-if="selectedMap">>
-      <map :map="selectedMap"></map>
+    <b-row class="mt-2" v-if="selectedMapId">
+      <map :id="selectedMapId"></map>
     </b-row>
   </div>
 </template>
@@ -24,6 +25,7 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 import Map from '@/components/Map.vue'
+
 let defaultFillColor = '#CCCCCC';
 
 export default {
@@ -36,9 +38,9 @@ export default {
     fetch("/api/maps").then(function(res) { return res.json(); })
       .then(function(maps) {
         self.maps = maps;
-        if (maps.length) {
+  /*      if (maps.length) {
           self.selectedMapId = maps[0].id;
-        }
+        }*/
       });
   },
   data: function() {
@@ -48,13 +50,21 @@ export default {
     }
   },
   computed: {
-    selectedMap: function() {
-      this.selectedMapId && this.maps[this.selectedMapId] || null;
+    selectedMap: function(vm) {
+      if (!(vm.selectedMapId && vm.maps)) {
+        return [];
+      }
+      return vm.maps.find(function(map) {
+        return vm.selectedMapId === map.id;
+      });
     }
   },
   watch: {
   },
   methods: {
+    handleChange: function(event) {
+      console.log(this.selectedMapId, this.selectedMap, this.maps, this.maps[this.selectedMapId]);
+    },
     mapClick: function(event) {
       if (this.creating_watershed && !this.polygon) {
         

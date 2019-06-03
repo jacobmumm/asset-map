@@ -111,14 +111,21 @@ let defaultFillColor = '#CCCCCC';
 
 export default {
   name: 'map',
-  props: ['map'],
+  props: ['id'],
   components: {
     // HelloWorld
   },
+  created () {
+    console.log("map created");
+  },
+  updated () {
+    console.log("map updated");
+  },
   mounted () {
+    console.log("map mounted");
     let self = this;
-    console.log("mounted map component for prop", this.map);
-    fetch("/api/" + this.map.id + "/watersheds").then(function(res) { return res.json(); })
+    console.log("mounted map component for prop", this.id);
+    fetch("/api/" + this.id + "/watersheds").then(function(res) { return res.json(); })
       .then(function(watersheds) {
       self.watersheds = watersheds.map(function(w) {
         var points = w.bounds.split(":").map(function(b) {
@@ -150,7 +157,8 @@ export default {
       place: null,
       locating: false,
       located: false,
-      locatedWatershed: null
+      locatedWatershed: null,
+      id: null
     }
   },
   computed: {
@@ -197,7 +205,7 @@ export default {
         return str;
       }, "");
       
-      fetch("/api/" + this.map.id + "/watersheds", {
+      fetch("/api/" + this.id + "/watersheds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
