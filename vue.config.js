@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  publicPath: "asset-map/",
+  publicPath: "/",
   pluginOptions: {
     'style-resources-loader': {
       preProcessor: 'scss',
