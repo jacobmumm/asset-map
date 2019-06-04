@@ -1,5 +1,5 @@
 <template>
-  <div class="map">
+  <div class="map-viewer">
     <b-row>
       <b-col>
         <div class='px-4'>
@@ -104,44 +104,14 @@
 </template>
 
 <script>
-// @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue'
 
 let defaultFillColor = '#CCCCCC';
 
 export default {
   name: 'map',
-  props: ['id'],
-  components: {
-    // HelloWorld
-  },
-  created () {
-    console.log("map created");
-  },
-  updated () {
-    console.log("map updated");
-  },
+  props: ['mapId'],
   mounted () {
-    console.log("map mounted");
-    let self = this;
-    console.log("mounted map component for prop", this.id);
-    fetch("/api/" + this.id + "/watersheds").then(function(res) { return res.json(); })
-      .then(function(watersheds) {
-      self.watersheds = watersheds.map(function(w) {
-        var points = w.bounds.split(":").map(function(b) {
-            var coord = b.split(",");
-            return {
-              lat: parseFloat(coord[0]),
-              lng: parseFloat(coord[1])
-            };
-        });
-        return {
-          name: w.title,
-          fillColor: w.color,
-          points: points
-        };
-      });
-    });
+    this.loadWatersheds();
   },
   data: function() {
     return {
@@ -158,7 +128,7 @@ export default {
       locating: false,
       located: false,
       locatedWatershed: null,
-      id: null
+      mapId: null
     }
   },
   computed: {
@@ -167,8 +137,32 @@ export default {
     }
   },
   watch: {
+    mapId: function() {
+       this.loadWatersheds();
+    }
   },
   methods: {
+    loadWatersheds: function() {
+      let self = this;
+      if (!this.mapId) { this.cancelWatershed(); return; }
+      fetch("/api/maps/" + this.mapId + "/watersheds").then(function(res) { return res.json(); })
+        .then(function(watersheds) {
+        self.watersheds = watersheds.map(function(w) {
+          var points = w.bounds.split(":").map(function(b) {
+              var coord = b.split(",");
+              return {
+                lat: parseFloat(coord[0]),
+                lng: parseFloat(coord[1])
+              };
+          });
+          return {
+            name: w.title,
+            fillColor: w.color,
+            points: points
+          };
+        });
+      });
+    }, 
     mapClick: function(event) {
       if (this.creating_watershed && !this.polygon) {
         
@@ -205,7 +199,7 @@ export default {
         return str;
       }, "");
       
-      fetch("/api/" + this.id + "/watersheds", {
+      fetch("/api/maps/" + this.mapId + "/watersheds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -219,7 +213,6 @@ export default {
           newWatershed.id = ws.id;
           self.watersheds.push(newWatershed);
         }
-        console.log(this.watersheds)
       });
       
       this.cancelWatershed()
