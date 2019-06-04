@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.0a37c7cdaa434d83500cee53d8ea5b46.js"
+  "/precache-manifest.ed4cee2d27cb60ad796b7026f6ee0540.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "asset-map"});
