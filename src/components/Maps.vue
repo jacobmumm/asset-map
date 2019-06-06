@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="maps">
     <map-picker v-model="selectedMapId"></map-picker>
     <map-viewer v-bind:mapId="selectedMapId"></map-viewer>
   </div>
@@ -9,7 +9,7 @@ import MapPicker from './MapPicker.vue';
 import MapViewer from './MapViewer.vue';
 
 export default {
-  name: 'home',
+  name: 'maps',
   components: {
     mapPicker: MapPicker,
     mapViewer: MapViewer

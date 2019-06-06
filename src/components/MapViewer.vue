@@ -127,8 +127,7 @@ export default {
       place: null,
       locating: false,
       located: false,
-      locatedWatershed: null,
-      mapId: null
+      locatedWatershed: null
     }
   },
   computed: {
@@ -208,7 +207,7 @@ export default {
           color: newWatershed.fillColor
         })
       }).then(function(res) { return res.json(); })
-	.then(function(ws) {
+	    .then(function(ws) {
         if (ws.id) {
           newWatershed.id = ws.id;
           self.watersheds.push(newWatershed);
