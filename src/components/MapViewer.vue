@@ -225,11 +225,16 @@ export default {
     },
     deleteWatershed: function(ws) {
       let self = this;
-      fetch("/api/watersheds/" + ws.id, {
-        method: "DELETE"
-      }).then( () => {
-        self.watersheds = self.watersheds.filter( w => w.id !== ws.id );
-      })
+      self.$bvModal.msgBoxConfirm("Are you sure you want to delete this watershed?")
+        .then( confirm => {
+          if (confirm) {
+            fetch("/api/watersheds/" + ws.id, {
+              method: "DELETE"
+            }).then( () => {
+              self.watersheds = self.watersheds.filter( w => w.id !== ws.id );
+            })
+          }
+        })
     },
     editWatershed: function(ws) {
       this.clearActive();

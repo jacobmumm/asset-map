@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Maps from './components/Maps.vue'
+import AssetClassification from './components/AssetClassification.vue'
 import Home from './views/Home.vue'
 
 Vue.use(Router)
@@ -18,6 +19,11 @@ export default new Router({
       path: '/maps',
       name: 'maps',
       component: Maps
+    },
+    {
+      path: '/asset-classification',
+      name: 'asset-classification',
+      component: AssetClassification
     },
     {
       path: '/contribute',

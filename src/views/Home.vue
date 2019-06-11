@@ -120,6 +120,9 @@
       <b-list-group-item>
         <router-link to="/maps">Watershed Map Builder</router-link>
       </b-list-group-item>
+      <b-list-group-item>
+        <router-link to="/asset-classification">Asset Classification</router-link>
+      </b-list-group-item>
     </b-list-group>
   </section>
 </template>
