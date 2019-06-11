@@ -53,10 +53,10 @@
               <a v-if="!ws.active">{{ ws.title }}</a>
               <b-form-input v-if="ws.active" v-model="ws.title"></b-form-input>
             </b-col>
-            <b-col cols="2" class="d-flex">
-              <b-button v-if="!ws.active" variant="info" @click="editWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="edit"/></b-button>
-              <b-button v-if="!ws.active" variant="danger" @click="watersheds.splice(ix,1)" :disabled="editing_watershed || creating_watershed" size="sm" class="ml-1"><fa-icon icon="trash"/></b-button>
-              <b-button v-if="ws.active" variant="primary" @click="updateWatershed(ws)" size="sm" class="ml-1"><fa-icon icon="check"/></b-button>
+            <b-col cols="2" class="d-flex justify-content-end">
+              <b-button v-if="!ws.active" variant="light" @click="editWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="edit"/></b-button>
+              <b-button v-if="!ws.active" variant="light" @click="deleteWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="trash"/></b-button>
+              <b-button v-if="ws.active" variant="primary" @click="updateWatershed(ws)" size="sm"><fa-icon icon="check"/></b-button>
             </b-col>
           </b-list-item>
           <b-list-item class="watershed-list-item px-3 py-2 mb-1" key="new">
@@ -69,16 +69,18 @@
                   <verte class="mr-2" v-if="newWatershed.title" v-model="newWatershed.color" picker="square" model="rgb"></verte>
                   <b-button v-if="creating_watershed" 
                             class="ml-1"
-                            variant="outline-info" 
+                            size="sm"
+                            variant="light" 
                             @click="cancelWatershed"><fa-icon icon="times"/>
                   </b-button>
                   <b-button v-if="creating_watershed && newWatershed.polygon" 
                             class="ml-1" 
+                            size="sm"
                             variant="primary" 
                             @click="saveWatershed"><fa-icon icon="check"/>
                   </b-button>
                   <b-button v-if="!creating_watershed && newWatershed.title" 
-                            variant="info" 
+                            variant="light" 
                             class="ml-1"
                             size="sm" 
                             :disabled="!newWatershed.title" 
@@ -152,7 +154,7 @@ export default {
   },
   computed: {
     watershedPaths: function() {
-      return this.watersheds.map(function(w) { return w.polygon; })
+      return this.watersheds.map( w => w.polygon )
     }
   },
   watch: {
@@ -164,12 +166,12 @@ export default {
     loadWatersheds: function() {
       let self = this;
       if (!this.mapId) { this.cancelWatershed(); return; }
-      fetch("/api/maps/" + this.mapId + "/watersheds").then(function(res) { return res.json(); })
+      fetch("/api/maps/" + this.mapId + "/watersheds").then( res => res.json() )
         .then(function(watersheds) {
-        self.watersheds = watersheds.map(function(w) {
-          w.polygon = self.boundsToPolygon(w.bounds);
-          return w;
-        });
+          self.watersheds = watersheds.map( w => {
+            w.polygon = self.boundsToPolygon(w.bounds);
+            return w;
+          });
       });
     },
     mapClick: function(event) {
@@ -187,8 +189,8 @@ export default {
       }
     },
     boundsToPolygon: function(bounds) {
-      return bounds.split(":").map(function(b) {
-        var coord = b.split(",");
+      return bounds.split(":").map( b => {
+        const coord = b.split(",");
         return {
           lat: parseFloat(coord[0]),
           lng: parseFloat(coord[1])
@@ -197,7 +199,7 @@ export default {
     },
     polygonToBounds: function(polygon) {
       let first = true;
-      return polygon.reduce(function(str, coord) {
+      return polygon.reduce( (str, coord) => {
         if (first) {
           first = false;
         } else {
@@ -221,6 +223,14 @@ export default {
         return w;
       });
     },
+    deleteWatershed: function(ws) {
+      let self = this;
+      fetch("/api/watersheds/" + ws.id, {
+        method: "DELETE"
+      }).then( () => {
+        self.watersheds = self.watersheds.filter( w => w.id !== ws.id );
+      })
+    },
     editWatershed: function(ws) {
       this.clearActive();
       ws.active = true;
@@ -233,22 +243,20 @@ export default {
         color: ws.color,
         bounds: this.polygonToBounds(ws.polygon)
       };
-      console.log("PATCHING", JSON.stringify(watershed));
       fetch("/api/watersheds/" + ws.id, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(watershed)
-      }).then(function(res) {
+      }).then( res => {
         //assert(res.status === 204);
-        if (ws.active) { console.log("resetting for real"); }
         ws.active = false;
         self.editing_watershed = false;
         self.$forceUpdate();
       });
     },
     saveWatershed: function() {
-      var self = this;
-      var watershed = {
+      let self = this;
+      let watershed = {
         title: this.newWatershed.title,
         color: this.newWatershed.color
       };
@@ -259,20 +267,19 @@ export default {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(watershed)
-      }).then(function(res) { return res.json(); })
-	    .then(function(ws) {
-        self.watersheds.push(Object.assign({}, ws, {
-          polygon: self.newWatershed.polygon
-        }));
-        self.cancelWatershed();
-      });
+      }).then( res => res.json() )
+	      .then((ws) => {
+          self.watersheds.push(Object.assign({}, ws, {
+            polygon: self.newWatershed.polygon
+          }));
+          self.cancelWatershed();
+        });
     },
     cancelWatershed: function(watershed) {
       this.newWatershed = this.generateEmptyWatershed();
       this.creating_watershed = false; 
     },
     updateEdited(mvcArray, watershed) {
-      console.log('MVC=', mvcArray)
       let paths = [];
       for (let i=0; i<mvcArray.getLength(); i++) {
         let path = [];
@@ -282,13 +289,10 @@ export default {
         }
         paths.push(path);
       }
-      console.log('paths=', paths[0])
       watershed.polygon = paths[0]
     },
     setPlace(place) {
       if (!place) return
-
-      console.log(place)
 
       this.locateWatershed(place)
 
@@ -305,7 +309,6 @@ export default {
       let lat = this.place.geometry.location.lat()
       let lng = this.place.geometry.location.lng()
       let latLng = new google.maps.LatLng(lat, lng)
-      console.log("LL=", latLng)
 
       this.located = false
       this.locating = true
@@ -314,12 +317,11 @@ export default {
 
       let this1 = this
 
-      this.watersheds.forEach(function(w) {
+      this.watersheds.forEach( w => {
         let wPolygon = new google.maps.Polygon({
           paths: w.polygon // Need to call map?
         });
 
-        console.log('CHECKING', wPolygon)
         if(google.maps.geometry.poly.containsLocation(latLng, wPolygon)) {
           this1.locatedWatershed = w
         }
