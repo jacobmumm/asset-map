@@ -12,6 +12,7 @@
           <b-navbar-nav>
             <b-nav-item to="/maps">Watershed Maps</b-nav-item>
             <b-nav-item to="/asset-classification">Asset Classification</b-nav-item>
+            <b-nav-item to="/assets">Asset Map</b-nav-item>
           </b-navbar-nav>
         
           <!-- Right aligned nav items -->
