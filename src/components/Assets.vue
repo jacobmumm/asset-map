@@ -1,52 +1,65 @@
 <template>
-  <div class="asset-viewer">
+  <div class="asset-viewer container-fluid">
     <b-row>
       <b-col>
-        <div class='px-4'>
-
-          <GmapMap
-           :options="{
-              zoomControl: true,
-              mapTypeControl: false,
-              scaleControl: false,
-              streetViewControl: false,
-              rotateControl: false,
-              fullscreenControl: false,
-              disableDefaultUi: false
-            }"
-            :center="location"
-            :zoom="zoom"
-            style="width: 100%; height: 500px"
-            @click="mapClick"
-          >
-            <GmapMarker
-              :key="index"
-              v-for="(a, index) in assetsWithPositions"
-              :icon="a.icon"
-              :position="a.position"
-              :clickable="false"
-              :draggable="a.active"
-              @dragend="updateEditedActive"
-            />
-            <GmapMarker
-              :v-if="creating_asset && newAsset.position"
-              icon="/img/markers/green-marker.png"
-              :position="newAsset.position"
-              :clickable="false"
-              :draggable="true"
-              @dragend="updateEdited"
-            />
-          </GmapMap>
-        </div>
+        <b-row>
+          <b-col class="d-flex">
+            <h3>Filter:</h3>
+            <b-form-select v-model="filter.asset_type_id">
+              <option value="all">Show All Types</option>
+              <option v-for="type in assetTypes" :key="type.id" :value="type.id">
+                {{type.title}}
+              </option>
+            </b-form-select>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <GmapMap
+            :options="{
+                zoomControl: true,
+                mapTypeControl: false,
+                scaleControl: false,
+                streetViewControl: false,
+                rotateControl: false,
+                fullscreenControl: false,
+                disableDefaultUi: false
+              }"
+              :center="location"
+              :zoom="zoom"
+              style="width: 100%; height: 500px"
+              @click="mapClick"
+            >
+              <GmapMarker
+                :key="index"
+                v-for="(a, index) in sortedAssets"
+                :icon="a.icon"
+                :position="a.position"
+                :clickable="false"
+                :draggable="a.active"
+                @dragend="updateEditedActive"
+              />
+              <GmapMarker
+                :v-if="creating_asset && newAsset.position"
+                :icon="newAsset.icon"
+                :position="newAsset.position"
+                :clickable="false"
+                :draggable="true"
+                @dragend="updateEdited"
+              />
+            </GmapMap>
+          </b-col>
+        </b-row>
       </b-col>
 
-      <b-col class="mr-3">
+      <b-col>
 
         <h3>Assets:</h3>
 
         <b-list-group>
-          <b-list-item class="asset-list-item d-flex align-items-center px-3 py-2 rounded mb-1" v-for="asset in assets" :key="asset.id">
-            <b-col cols="10">
+          <b-list-item class="asset-list-item d-flex align-items-center px-3 py-2 rounded mb-1" v-for="asset in sortedAssets" :key="asset.id">
+            <b-col cols="10" class="d-flex align-items-center">
+              <img class="asset-list-item_icon" :src="asset.icon.url" />
               <a v-if="!asset.active">{{ asset.title }}</a>
               <b-form-input v-if="asset.active" v-model="asset.title"></b-form-input>
             </b-col>
@@ -60,7 +73,7 @@
             <b-form v-if="!editing_asset">
               <b-row class="align-items-center">
                 <b-col cols="3">
-                  <b-form-select v-model="newAsset.asset_type_id">
+                  <b-form-select v-model="newAsset.asset_type_id" :disabled="creating_asset">
                     <option v-for="type in assetTypes" :key="type.id" :value="type.id">
                       {{type.title}}
                     </option>
@@ -87,7 +100,7 @@
                             class="ml-1"
                             size="sm" 
                             :disabled="!newAsset.title" 
-                            @click="creating_asset = true">
+                            @click="startCreate">
                             <fa-icon icon="plus"/>
                   </b-button>
                 </b-col>
@@ -111,6 +124,11 @@
   .asset-list-item {
     background: #f8f8f8;
   }
+  .asset-list-item_icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
 </style>
 <script>
 import {loaded} from 'vue2-google-maps';
@@ -124,13 +142,6 @@ export default {
   },
   data: function() {
     return {
-      baseMarkerIcon: {
-          path: 'M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z',
-          fillColor: "#FF0000",
-          fillOpacity: 1,
-          strokeColor: '',
-          strokeWeight: 0
-      },
       iconSize: { width: 20, height: 32 },
       location: {lat: 35.5951, lng: -82.5515},
       zoom: 9,
@@ -143,14 +154,22 @@ export default {
       locating: false,
       located: false,
       locatedAsset: null,
-      assetTypes: []
+      assetTypes: [],
+      filter: {
+        asset_type_id: 'all'
+      },
     }
   },
   computed: {
-    assetsWithPositions: function() {
-      let aas = (this.assets || []).filter( a => !!a.position );
-      console.log('computed', aas);
-      return aas;
+    sortedAssets: function() {
+      var self = this;
+      return (this.assets || []).reduce( (list, asset) => {
+        if (!asset.position) { return list; }
+        if (self.filter.asset_type_id === "all" || self.filter.asset_type_id === asset.asset_type_id) {
+          list.push(asset);
+        }
+        return list;
+      }, []);
     }
   },
   watch: {
@@ -194,7 +213,7 @@ export default {
       if (iconPath) {
         return {
           url: iconPath,
-          size: {width: 20, height: 20, f: 'px', b: 'px'},
+          size: {width: 16, height: 16, f: 'px', b: 'px'},
           scaledSize: {width: 16, height: 16, f: 'px', b: 'px'}
         };
       }
@@ -207,7 +226,6 @@ export default {
           self.assets = assets.map( asset => {
             asset.position = JSON.parse(asset.position);
             asset.icon = self.getIcon(asset.asset_type_id);
-            asset.iconPath = asset.icon.url;
             asset.shape = {
               coords: [1, 1, 1, 20, 18, 20, 18, 1],
               type: 'poly'
@@ -258,6 +276,9 @@ export default {
     editAsset: function(asset) {
       this.clearActive();
       asset.active = true;
+      asset.icon.scale = 1.2;
+      asset.icon.fillColor = '#FF0000';
+      asset.icon.color = '#0000FF';
       this.editing_asset = true;
     },
     updateAsset: function(asset) {
@@ -277,6 +298,13 @@ export default {
         self.$forceUpdate();
       });
     },
+    startCreate: function() {
+      this.creating_asset = true;
+      this.newAsset.icon = this.getIcon(this.newAsset.asset_type_id);
+      this.newAsset.icon.fillColor = '#FF0000';
+      this.newAsset.icon.color = '#0000FF';
+      this.newAsset.icon.scale = 1.2;
+    },
     saveAsset: function() {
       let self = this;
 
@@ -292,8 +320,12 @@ export default {
         body: JSON.stringify(asset)
       }).then( res => res.json() )
 	      .then((asset) => {
+          delete self.newAsset.icon.fillColor;
+          delete self.newAsset.icon.color;
+          delete self.newAsset.icon.scale;
           self.assets.push(Object.assign({}, asset, {
-            position: self.newAsset.position
+            position: self.newAsset.position,
+            icon: self.newAsset.icon
           }));
           self.cancelAsset();
         });
