@@ -17,6 +17,9 @@ library.add(fas, fab)
 
 Vue.component('fa-icon', FontAwesomeIcon)
 
+import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
+Vue.component('vue-bootstrap-typeahead', VueBootstrapTypeahead)
+
 import Verte from 'verte';
 import 'verte/dist/verte.css';
 // register component globally

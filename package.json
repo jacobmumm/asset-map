@@ -24,6 +24,7 @@
     "register-service-worker": "^1.6.2",
     "verte": "^0.0.12",
     "vue": "^2.6.10",
+    "vue-bootstrap-typeahead": "^0.2.6",
     "vue-router": "^3.0.3",
     "vue2-google-maps": "^0.10.6",
     "vuex": "^3.0.1",

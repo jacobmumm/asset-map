@@ -4,6 +4,7 @@ import Maps from './components/Maps.vue'
 import AssetClassification from './components/AssetClassification.vue'
 import Home from './views/Home.vue'
 import Assets from './components/Assets.vue'
+import AssetForm from './components/AssetForm.vue'
 
 Vue.use(Router)
 
@@ -30,6 +31,11 @@ export default new Router({
       path: '/assets',
       name: 'asset-map',
       component: Assets
+    },
+    {
+      path: '/asset-form',
+      name: 'asset-form',
+      component: AssetForm
     },
     {
       path: '/contribute',

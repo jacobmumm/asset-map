@@ -126,6 +126,9 @@
       <b-list-group-item>
         <router-link to="/assets">Asset Map</router-link>
       </b-list-group-item>
+      b-list-group-item>
+        <router-link to="/asset-form">Asset Map</router-link>
+      </b-list-group-item>
     </b-list-group>
   </section>
 </template>

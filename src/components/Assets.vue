@@ -72,17 +72,17 @@
           <b-list-item class="asset-list-item px-3 py-2 mb-1" key="new">
             <b-form v-if="!editing_asset">
               <b-row class="align-items-center">
-                <b-col cols="3">
+                <b-col cols="4" md="auto">
                   <b-form-select v-model="newAsset.asset_type_id" :disabled="creating_asset">
                     <option v-for="type in assetTypes" :key="type.id" :value="type.id">
                       {{type.title}}
                     </option>
                   </b-form-select>
                 </b-col>
-                <b-col cols="6">
+                <b-col cols="7">
                   <b-form-input v-model="newAsset.title" placeholder="New asset name" class="mb-1"></b-form-input>
                 </b-col>
-                <b-col class="d-flex justify-content-end" cols="3">
+                <b-col cols="1" class="d-flex justify-content-end">
                   <b-button v-if="creating_asset" 
                             class="ml-1"
                             size="sm"
