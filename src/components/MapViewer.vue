@@ -48,17 +48,6 @@
         <h3>Watersheds:</h3>
 
         <b-list-group>
-          <b-list-item class="watershed-list-item d-flex align-items-center px-3 py-2 rounded mb-1" v-for="ws in watersheds" :key="ws.id" :style="'border-left: 4px solid ' + ws.color">
-            <b-col cols="10">
-              <a v-if="!ws.active">{{ ws.title }}</a>
-              <b-form-input v-if="ws.active" v-model="ws.title"></b-form-input>
-            </b-col>
-            <b-col cols="2" class="d-flex justify-content-end">
-              <b-button v-if="!ws.active" variant="light" @click="editWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="edit"/></b-button>
-              <b-button v-if="!ws.active" variant="light" @click="deleteWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="trash"/></b-button>
-              <b-button v-if="ws.active" variant="primary" @click="updateWatershed(ws)" size="sm"><fa-icon icon="check"/></b-button>
-            </b-col>
-          </b-list-item>
           <b-list-item class="watershed-list-item px-3 py-2 mb-1" key="new">
             <b-form v-if="!editing_watershed">
               <b-row class="align-items-center">
@@ -96,6 +85,17 @@
                 </b-col>
               </b-row>
             </b-form>
+          </b-list-item>
+          <b-list-item class="watershed-list-item d-flex align-items-center px-3 py-2 rounded mb-1" v-for="ws in watersheds" :key="ws.id" :style="'border-left: 4px solid ' + ws.color">
+            <b-col cols="10">
+              <a v-if="!ws.active">{{ ws.title }}</a>
+              <b-form-input v-if="ws.active" v-model="ws.title"></b-form-input>
+            </b-col>
+            <b-col cols="2" class="d-flex justify-content-end">
+              <b-button v-if="!ws.active" variant="light" @click="editWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="edit"/></b-button>
+              <b-button v-if="!ws.active" variant="light" @click="deleteWatershed(ws)" :disabled="editing_watershed || creating_watershed" size="sm"><fa-icon icon="trash"/></b-button>
+              <b-button v-if="ws.active" variant="primary" @click="updateWatershed(ws)" size="sm"><fa-icon icon="check"/></b-button>
+            </b-col>
           </b-list-item>
         </b-list-group>
 

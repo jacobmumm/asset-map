@@ -57,18 +57,6 @@
         <h3>Assets:</h3>
 
         <b-list-group>
-          <b-list-item class="asset-list-item d-flex align-items-center px-3 py-2 rounded mb-1" v-for="asset in sortedAssets" :key="asset.id">
-            <b-col cols="10" class="d-flex align-items-center">
-              <img class="asset-list-item_icon" :src="asset.icon.url" />
-              <a v-if="!asset.active">{{ asset.title }}</a>
-              <b-form-input v-if="asset.active" v-model="asset.title"></b-form-input>
-            </b-col>
-            <b-col cols="2" class="d-flex justify-content-end">
-              <b-button v-if="!asset.active" variant="light" @click="editAsset(asset)" :disabled="editing_asset || creating_asset" size="sm"><fa-icon icon="edit"/></b-button>
-              <b-button v-if="!asset.active" variant="light" @click="deleteAsset(asset)" :disabled="editing_asset || creating_asset" size="sm"><fa-icon icon="trash"/></b-button>
-              <b-button v-if="asset.active" variant="primary" @click="updateAsset(asset)" size="sm"><fa-icon icon="check"/></b-button>
-            </b-col>
-          </b-list-item>
           <b-list-item class="asset-list-item px-3 py-2 mb-1" key="new">
             <b-form v-if="!editing_asset">
               <b-row class="align-items-center">
@@ -113,6 +101,18 @@
               </b-row>
             </b-form>
           </b-list-item>
+          <b-list-item class="asset-list-item d-flex align-items-center px-3 py-2 rounded mb-1" v-for="asset in sortedAssets" :key="asset.id">
+            <b-col cols="10" class="d-flex align-items-center">
+              <img class="asset-list-item_icon" :src="asset.icon.url" />
+              <a v-if="!asset.active">{{ asset.title }}</a>
+              <b-form-input v-if="asset.active" v-model="asset.title"></b-form-input>
+            </b-col>
+            <b-col cols="2" class="d-flex justify-content-end">
+              <b-button v-if="!asset.active" variant="light" @click="editAsset(asset)" :disabled="editing_asset || creating_asset" size="sm"><fa-icon icon="edit"/></b-button>
+              <b-button v-if="!asset.active" variant="light" @click="deleteAsset(asset)" :disabled="editing_asset || creating_asset" size="sm"><fa-icon icon="trash"/></b-button>
+              <b-button v-if="asset.active" variant="primary" @click="updateAsset(asset)" size="sm"><fa-icon icon="check"/></b-button>
+            </b-col>
+          </b-list-item>
         </b-list-group>
 
       </b-col>
@@ -134,8 +134,8 @@
 import {loaded} from 'vue2-google-maps';
 
 export default {
-  name: 'map',
-  props: ['mapId'],
+  name: 'interview-assets',
+  props: ['interviewId'],
   mounted () {
     this.loadAssets();
     this.loadAssetTypes();
@@ -173,9 +173,9 @@ export default {
     }
   },
   watch: {
-    /*mapId: function() {
+    interviewId: function() {
        this.loadAssets();
-    }*/
+    }
   },
   methods: {
     getIcon: function(typeId) {
@@ -221,7 +221,10 @@ export default {
     },
     loadAssets: function() {
       let self = this;
-      Promise.all([loaded, fetch("/api/assets")]).then( x => x[1].json() )
+      const assetPromise = this.interviewId ? 
+        fetch("/api/interviews/" + this.interviewId + "/assets") : fetch("/api/assets");
+
+      Promise.all([loaded, assetPromise]).then( x => x[1].json() )
         .then( assets => {
           self.assets = assets.map( asset => {
             asset.position = JSON.parse(asset.position);
@@ -313,8 +316,8 @@ export default {
         asset_type_id: this.newAsset.asset_type_id,
         position: JSON.stringify(this.newAsset.position)
       };
-     
-      fetch("/api/assets", {
+      const assetPath = this.interviewId ? "/api/interviews/" + self.interviewId + "/assets" : "/api/assets";
+      fetch(assetPath, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(asset)

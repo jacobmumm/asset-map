@@ -1,5 +1,5 @@
 <template>
-  <b-container class="asset-relationships">
+  <b-container fluid class="asset-relationships">
     <b-row class="mb-4">
       <b-col>
         <h3>Asset Relationships</h3>
@@ -9,9 +9,14 @@
           <b-col cols="4">Asset B</b-col>
         </b-row>
         <b-row>
-          <b-col cols="4"><vue-bootstrap-typeahead v-model="fromAsset" :data="assets" :serializer="a => a.title"></vue-bootstrap-typeahead></b-col>
-          <b-col cols="4"><vue-bootstrap-typeahead v-model="relationshipType" :data="relationships" :serializer="r => r.title"></vue-bootstrap-typeahead></b-col>
-          <b-col cols="4"><vue-bootstrap-typeahead v-model="toAsset" :data="assets" :serializer="a => a.title"></vue-bootstrap-typeahead></b-col>
+          <b-col cols="4"><vue-bootstrap-typeahead v-model="fromAsset" :data="assets" :serializer="a => a.title" minMatchingChars="0" maxMatches="10"></vue-bootstrap-typeahead></b-col>
+          <b-col cols="4"><vue-bootstrap-typeahead v-model="relationshipType" :data="relationships" :serializer="r => r.title" minMatchingChars="0" maxMatches="10"></vue-bootstrap-typeahead></b-col>
+          <b-col cols="4"><vue-bootstrap-typeahead v-model="toAsset" :data="assets" :serializer="a => a.title" minMatchingChars="0" maxMatches="10"></vue-bootstrap-typeahead></b-col>
+        </b-row>
+        <b-row class="mb-4">
+          <b-col class="d-flex justify-content-end">
+            <b-button v-on:click="saveRelationship()" variant="primary">Save</b-button>
+          </b-col>
         </b-row>
         <b-table striped hover :items="relationships" :fields="fields"></b-table>
       </b-col>
@@ -23,29 +28,30 @@ export default {
   name: 'asset-classification',
   data: function() {
     return {
+      interviewId: null,
       fromAsset: null,
       toAsset: null,
       relationship: null,
       assets: [],
+      relationshipTypes: [],
       relationships: [],
-      assetTypes: []
     };
   },
   computed: {
   },
   mounted() {
     let self = this;
-    /*fetch("/api/asset-relationships").then( res => res.json() )
-      .then( relationships => {
-        self.relationships = relationships;
-      })*/
     fetch("/api/assets").then( res => res.json() )
       .then( assets => {
         self.assets = assets;
       })
-    fetch("/api/asset-types").then( res => res.json() )
+    fetch("/api/assets-relationship-types").then( res => res.json() )
       .then( types => {
-        self.assetTypes = types;
+        self.relationshipTypes = types;
+      })
+    fetch("/api/interviews/" + self.interviewId + "/relationships").then( res => res.json() )
+      .then( relationships => {
+        self.relationships = relationships;
       })
   },
   methods: {
